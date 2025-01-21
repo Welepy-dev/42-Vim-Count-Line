@@ -2,7 +2,7 @@ import vim
 import re
 
 # Define the pattern for a function
-pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{.*?\}"
+pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\s+\**([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{(\n|.)*?\}"
 
 # Get the buffer content as a single string
 content = "\n".join(vim.current.buffer)
