@@ -1,21 +1,28 @@
 import vim
 import re
 
-# Define the sign (only needs to be done once)
-vim.command('sign define MatchSign text=> texthl=Search')
-
-# Get the buffer content as a string
-content = "\n".join(vim.current.buffer)
-
-# Define a regex pattern
+# Define the pattern for a function
 pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{.*?\}"
 
-# Find matches and place signs in the gutter
-for match in re.finditer(pattern, content, re.DOTALL):
-    # Calculate the start line
-    start_pos = match.start()
-    start_line = content[:start_pos].count("\n") + 1
+# Get the buffer content as a single string
+content = "\n".join(vim.current.buffer)
 
-    # Place a sign in the gutter
-    vim.command(f'sign place {start_line} line={start_line} name=MatchSign buffer={vim.current.buffer.number}')
+# Search for the pattern in the buffer
+match = re.search(pattern, content, re.DOTALL)
+
+if match:
+    # Extract match start and end positions
+    start_pos = match.start()
+    end_pos = match.end()
+    matched_text = match.group()
+
+    # Calculate the line numbers
+    lines = content[:start_pos].splitlines()
+    start_line = len(lines)
+    end_line = start_line + matched_text.count("\n")
+    
+    # Print or use the match results
+    vim.command(f'echo "Match found from line {start_line} to {end_line}"')
+else:
+    vim.command('echo "No match found."')
 
