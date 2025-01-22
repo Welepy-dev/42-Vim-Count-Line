@@ -1,28 +1,52 @@
-import vim
 import re
+import vim
 
-# Define the pattern for a function
-pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\s+\**([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{(\n|.)*?\}"
+def get_lines():
 
-# Get the buffer content as a single string
-content = "\n".join(vim.current.buffer)
+    file_path = vim.eval('expand("%:p")')
 
-# Search for the pattern in the buffer
-match = re.search(pattern, content, re.DOTALL)
-
-if match:
-    # Extract match start and end positions
-    start_pos = match.start()
-    end_pos = match.end()
-    matched_text = match.group()
-
-    # Calculate the line numbers
-    lines = content[:start_pos].splitlines()
-    start_line = len(lines)
-    end_line = start_line + matched_text.count("\n")
+    if not file_path:
+        vim.command('echo "Error: No file is currently loaded."')
+        return
     
-    # Print or use the match results
-    vim.command(f'echo "Match found from line {start_line} to {end_line}"')
-else:
-    vim.command('echo "No match found."')
+	try:
+        with open(file_path, 'r') as f:
+            code = f.read()
+    except Exception as e:
+        vim.command(f'echo "Error reading file: {e}"')
+        return
+
+
+    pattern = r"""
+    \b[a-zA-Z_][a-zA-Z0-9_]*\s+\**([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{
+    """
+
+
+    matches = re.finditer(pattern, code, re.DOTALL | re.VERBOSE)
+
+    function_lines = []
+
+    for match in matches:
+        func_start_index = match.start()
+        func_signature = match.group(0)
+        func_start_line = code[:func_start_index].count('\n') + 1
+        start = match.end()
+        stack = 1
+
+        for i, char in enumerate(code[start:], start=start):
+            if char == '{':
+                stack += 1
+            elif char == '}':
+                stack -= 1
+            if stack == 0:
+                func_end_index = i + 1
+                func_end_line = code[:func_end_index].count('\n')
+                function_lines.append({
+                    "name": func_signature.split('(')[0].strip(),
+                    "start_line": func_start_line,
+                    "end_line": func_end_line,
+                    "body": code[func_start_index:func_end_index]
+                })
+                break
+    vim.vars['function_lines'] = function_lines
 
