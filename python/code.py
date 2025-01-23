@@ -5,8 +5,7 @@ def get_lines():
 
 	file_path = vim.eval('expand("%:p")')
 
-	if not file_path:
-		vim.command('echo "Error: No file is currently loaded."')
+	if not file_path.endswith(('.c', '.cpp', '.h', '.hpp', '.cc', '.cxx')):
 		return
 	
 	try:
