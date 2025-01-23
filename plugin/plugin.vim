@@ -20,10 +20,8 @@ if exists('g:function_lines') && !empty(g:function_lines)
 	echo "Functions found:"
 	let sign_id = 1
 	for function_lines in g:function_lines
-		if function_lines['end_line'] > 25
-			execute 'sign place' sign_id 'line=' . function_lines['start_line'] . ' name=func_sign buffer=1'
-			let sign_id += 1
-			execute 'sign place' sign_id 'line=' . function_lines['end_line'] . ' name=end_sign buffer=1'
+		if ((function_lines['end_line']) - (function_lines['start_line'] + 1)) > 25
+			execute 'sign place' sign_id 'line=' . (function_lines['end_line'] + 1) . ' name=end_sign buffer=1'
 			let sign_id += 1
 		endif
 	endfor
